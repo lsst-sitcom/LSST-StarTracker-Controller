@@ -1,13 +1,14 @@
-from pymba import Vimba, VimbaException, Frame
-from time import sleep
-import sys
-from typing import Optional
-import cv2
-from astropy.io import fits
-import subprocess
 import os
+from time import sleep
 import tkinter as tk
+from typing import Optional
+import subprocess
 import statistics as st
+import sys
+
+from astropy.io import fits
+import cv2
+from pymba import Vimba, VimbaException, Frame
 
 
 def display_frame(frame: Frame, delay: Optional[int] = 1) -> None:
