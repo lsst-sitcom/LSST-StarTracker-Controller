@@ -42,70 +42,71 @@ def execute_exposure():
     if res == 1:
         f = open(os.path.join(OUTPUT_DIR, 'results/results.csv'), 'w')
 
-    with Vimba() as vimba:
-        camera.stop_frame_acquisition()
-        camera.disarm()
-        camera.arm('SingleFrame')
-        camera.ExposureAuto = 'Off'
-        camera.ExposureTimeAbs = exp * (10 ** 6)
+    camera.stop_frame_acquisition()
+    camera.disarm()
+    camera.arm('SingleFrame')
+    camera.ExposureAuto = 'Off'
+    camera.ExposureTimeAbs = exp * (10 ** 6)
 
-        for i in range(num):
-            frame = camera.acquire_frame(int(2.5e+7))
-            image = frame.buffer_data_numpy()
-            hdu = fits.PrimaryHDU(image)
-            hdu.writeto(os.path.join(OUTPUT_DIR, 'results/exposure_') + str(i + exposure_count) + '.fits')
-            cv2.imwrite(os.path.join(OUTPUT_DIR, 'results/exposure_') + str(i + exposure_count) + '.jpeg',
-                        image)
+    for i in range(num):
+        frame = camera.acquire_frame(int(2.5e+7))
+        image = frame.buffer_data_numpy()
+        hdu = fits.PrimaryHDU(image)
+        hdu.writeto(os.path.join(OUTPUT_DIR, 'results/exposure_') + str(i + exposure_count) + '.fits')
+        cv2.imwrite(os.path.join(OUTPUT_DIR, 'results/exposure_') + str(i + exposure_count) + '.jpeg',
+                    image)
 
-            if sol == 0:
-                cmd = ['solve-field', '--use-sextractor', '--guess-scale', '--cpulimit', '10',
-                       os.path.join(OUTPUT_DIR, 'results/exposure_') + str(i + exposure_count) + '.fits']
-                result = subprocess.check_output(cmd, cwd=os.path.join(OUTPUT_DIR, 'results/'))
+        if sol == 0:
+            cmd = ['solve-field', '--use-sextractor', '--guess-scale', '--cpulimit', '10',
+                   os.path.join(OUTPUT_DIR, 'results/exposure_') + str(i + exposure_count) + '.fits']
+            result = subprocess.check_output(cmd, cwd=os.path.join(OUTPUT_DIR, 'results/'))
 
-                if b'Total CPU time limit reached' in result or b'Did not solve (or no WCS file was written)' in result:
-                    display.insert(tk.END, 'Exposure ' + str(i + exposure_count) +': Unable to solve \n')
+            if b'Total CPU time limit reached' in result or \
+               b'Did not solve (or no WCS file was written)' in result:
+                display.insert(tk.END, 'Exposure ' + str(i + exposure_count) + ': Unable to solve \n')
 
-                    if res == 1:
-                        f.write('Exposure ' + str(i + exposure_count) + ': Unable to solve \n')
+                if res == 1:
+                    f.write('Exposure ' + str(i + exposure_count) + ': Unable to solve \n')
 
-                else:
-                    guide_front = result.index(b'Field center: (RA,Dec) = ') + len('Field center: (RA,Dec) = ')
-                    guide_back = result.index(b'Field center: (RA H:M:S, Dec D:M:S) =')
+            else:
+                guide_front = result.index(b'Field center: (RA,Dec) = ') + \
+                    len('Field center: (RA,Dec) = ')
+                guide_back = result.index(b'Field center: (RA H:M:S, Dec D:M:S) =')
 
-                    point = result[guide_front:guide_back - 6].decode()
+                point = result[guide_front:guide_back - 6].decode()
 
-                    display.insert(tk.END, 'Exposure ' + str(i + exposure_count) + ': ' + point + '\n')
+                display.insert(tk.END, 'Exposure ' + str(i + exposure_count) + ': ' + point + '\n')
 
-                    if res == 1:
-                        f.write('Exposure ' + str(i + exposure_count) + ': ' + point + '\n')
+                if res == 1:
+                    f.write('Exposure ' + str(i + exposure_count) + ': ' + point + '\n')
 
-                    RA = float(point[point.index('(') + 1:point.index(',')])
-                    DEC = float(point[point.index(',') + 2:point.index(')')])
+                RA = float(point[point.index('(') + 1:point.index(',')])
+                DEC = float(point[point.index(',') + 2:point.index(')')])
 
-                    list_RA.append(RA)
-                    list_DEC.append(DEC)
+                list_RA.append(RA)
+                list_DEC.append(DEC)
 
-        exposure_count += (i + 1)
+    exposure_count += (i + 1)
 
-        if res == 1 and list_RA != []:
-            f.write('\n')
-            f.write('Mean RA: ' + str(st.mean(list_RA)))
-            f.write('   RA std: ' + str(st.stdev(list_RA)) + '\n')
-            f.write('Mean DEC: ' + str(st.mean(list_DEC)))
-            f.write('   DEC std: ' + str(st.stdev(list_DEC)) + '\n\n')
+    if res == 1 and list_RA != []:
+        f.write('\n')
+        f.write('Mean RA: ' + str(st.mean(list_RA)))
+        f.write('   RA std: ' + str(st.stdev(list_RA)) + '\n')
+        f.write('Mean DEC: ' + str(st.mean(list_DEC)))
+        f.write('   DEC std: ' + str(st.stdev(list_DEC)) + '\n\n')
 
-        if res == 1:
-            f.close()
+    if res == 1:
+        f.close()
 
-        camera.ExposureTimeAbs = 1e+3
-        camera.disarm()
-        camera.arm('Continuous', display_frame)
-        camera.ExposureAuto = 'Continuous'
-        camera.start_frame_acquisition()
+    camera.ExposureTimeAbs = 1e+3
+    camera.disarm()
+    camera.arm('Continuous', display_frame)
+    camera.ExposureAuto = 'Continuous'
+    camera.start_frame_acquisition()
 
-        sleep(1)
+    sleep(1)
 
-        win.mainloop()
+    win.mainloop()
 
 # ================= Setting up GUI ================= #
 win = tk.Tk()
