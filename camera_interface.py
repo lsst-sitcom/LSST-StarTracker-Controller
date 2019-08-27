@@ -130,7 +130,7 @@ number = tk.Entry(win)
 number.grid(row=3, column=1, sticky='w')
 number.insert(tk.END, '1')
 
-solve_label = tk.Label(win, text='Dissable Astrometry.net solutions:').grid(row=4, column=0)
+solve_label = tk.Label(win, text='Disable Astrometry.net solutions:').grid(row=4, column=0)
 s = tk.IntVar()
 solve = tk.Checkbutton(win, variable=s)
 solve.grid(row=4, column=1, stick='w')
