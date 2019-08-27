@@ -8,7 +8,7 @@ import sys
 
 from astropy.io import fits
 import cv2
-from pymba import Vimba, VimbaException, Frame
+from pymba import Vimba, Frame
 
 
 def display_frame(frame: Frame, delay: Optional[int] = 1) -> None:
@@ -17,8 +17,8 @@ def display_frame(frame: Frame, delay: Optional[int] = 1) -> None:
     image = frame.buffer_data_numpy()
 
     # display image
-    cv2.namedWindow('Image',cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('Image', 600,600)
+    cv2.namedWindow('Image', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('Image', 600, 600)
     cv2.imshow('Image', image)
     cv2.waitKey(delay)
 
@@ -53,33 +53,32 @@ def execute_exposure():
             cv2.imwrite('/home/jbohrer/Desktop/results/exposure_' + str(i + exposure_count) + '.jpeg', image)
 
             if sol == 0:
-                cmd = ['solve-field', '--use-sextractor', '--guess-scale', '--cpulimit', '10', '/home/jbohrer/Desktop/results/exposure_' + str(i + exposure_count) + '.fits']
+                cmd = ['solve-field', '--use-sextractor', '--guess-scale', '--cpulimit', '10',
+                       '/home/jbohrer/Desktop/results/exposure_' + str(i + exposure_count) + '.fits']
                 result = subprocess.check_output(cmd, cwd='/home/jbohrer/Desktop/results/')
 
                 if b'Total CPU time limit reached' in result or b'Did not solve (or no WCS file was written)' in result:
                     display.insert(tk.END, 'Exposure ' + str(i + exposure_count) +': Unable to solve \n')
 
                     if res == 1:
-                        f.write('Exposure ' + str(i + exposure_count) +': Unable to solve \n')
+                        f.write('Exposure ' + str(i + exposure_count) + ': Unable to solve \n')
 
                 else:
-                    guide_front = result.index(b'Field center: (RA,Dec) = ')+len('Field center: (RA,Dec) = ')
+                    guide_front = result.index(b'Field center: (RA,Dec) = ') + len('Field center: (RA,Dec) = ')
                     guide_back = result.index(b'Field center: (RA H:M:S, Dec D:M:S) =')
 
-                    point = result[guide_front:guide_back-6].decode()
+                    point = result[guide_front:guide_back - 6].decode()
 
                     display.insert(tk.END, 'Exposure ' + str(i + exposure_count) + ': ' + point + '\n')
 
                     if res == 1:
                         f.write('Exposure ' + str(i + exposure_count) + ': ' + point + '\n')
 
-                    RA = float(point[point.index('(')+1:point.index(',')])
-                    DEC = float(point[point.index(',')+2:point.index(')')])
+                    RA = float(point[point.index('(') + 1:point.index(',')])
+                    DEC = float(point[point.index(',') + 2:point.index(')')])
 
                     list_RA.append(RA)
                     list_DEC.append(DEC)
-
-
 
         exposure_count += (i + 1)
 
