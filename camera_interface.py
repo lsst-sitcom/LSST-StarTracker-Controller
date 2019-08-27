@@ -2,8 +2,9 @@ import os
 from time import sleep
 import tkinter as tk
 from typing import Optional
-import subprocess
+import shutil
 import statistics as st
+import subprocess
 import sys
 
 from astropy.io import fits
@@ -14,6 +15,8 @@ try:
     OUTPUT_DIR = sys.argv[1]
 except IndexError:
     OUTPUT_DIR = os.path.expanduser("~/Desktop")
+
+RESULTS_DIR = "results"
 
 def display_frame(frame: Frame, delay: Optional[int] = 1) -> None:
 
@@ -40,7 +43,7 @@ def execute_exposure():
     res = r.get()
 
     if res == 1:
-        f = open(os.path.join(OUTPUT_DIR, 'results/results.csv'), 'w')
+        f = open(os.path.join(OUTPUT_DIR, RESULTS_DIR, 'results.csv'), 'w')
 
     camera.stop_frame_acquisition()
     camera.disarm()
@@ -52,14 +55,14 @@ def execute_exposure():
         frame = camera.acquire_frame(int(2.5e+7))
         image = frame.buffer_data_numpy()
         hdu = fits.PrimaryHDU(image)
-        hdu.writeto(os.path.join(OUTPUT_DIR, 'results/exposure_') + str(i + exposure_count) + '.fits')
-        cv2.imwrite(os.path.join(OUTPUT_DIR, 'results/exposure_') + str(i + exposure_count) + '.jpeg',
+        hdu.writeto(os.path.join(OUTPUT_DIR, RESULTS_DIR, 'exposure_') + str(i + exposure_count) + '.fits')
+        cv2.imwrite(os.path.join(OUTPUT_DIR, RESULTS_DIR, 'exposure_') + str(i + exposure_count) + '.jpeg',
                     image)
 
         if sol == 0:
             cmd = ['solve-field', '--use-sextractor', '--guess-scale', '--cpulimit', '10',
-                   os.path.join(OUTPUT_DIR, 'results/exposure_') + str(i + exposure_count) + '.fits']
-            result = subprocess.check_output(cmd, cwd=os.path.join(OUTPUT_DIR, 'results/'))
+                   os.path.join(OUTPUT_DIR, RESULTS_DIR, 'exposure_') + str(i + exposure_count) + '.fits']
+            result = subprocess.check_output(cmd, cwd=os.path.join(OUTPUT_DIR, RESULTS_DIR))
 
             if b'Total CPU time limit reached' in result or \
                b'Did not solve (or no WCS file was written)' in result:
@@ -149,8 +152,9 @@ start = tk.Button(win, text='Start Exposure', command=execute_exposure).grid(row
 # ================================================== #
 
 cv2.destroyAllWindows()
-os.system('cd ~/Desktop/; rm -r results')
-os.system('cd ~/Desktop/; mkdir results')
+os.chdir(OUTPUT_DIR)
+shutil.rmtree(os.path.join(os.curdir, RESULTS_DIR))
+os.makedirs(RESULTS_DIR)
 
 global exposure_count
 exposure_count = 0
