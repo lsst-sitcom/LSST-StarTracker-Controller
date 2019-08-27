@@ -10,6 +10,10 @@ from astropy.io import fits
 import cv2
 from pymba import Vimba, Frame
 
+try:
+    OUTPUT_DIR = sys.argv[1]
+except IndexError:
+    OUTPUT_DIR = os.path.expanduser("~/Desktop")
 
 def display_frame(frame: Frame, delay: Optional[int] = 1) -> None:
 
@@ -36,7 +40,7 @@ def execute_exposure():
     res = r.get()
 
     if res == 1:
-        f = open('/home/jbohrer/Desktop/results/results.csv', 'w')
+        f = open(os.path.join(OUTPUT_DIR, 'results/results.csv'), 'w')
 
     with Vimba() as vimba:
         camera.stop_frame_acquisition()
@@ -49,13 +53,14 @@ def execute_exposure():
             frame = camera.acquire_frame(int(2.5e+7))
             image = frame.buffer_data_numpy()
             hdu = fits.PrimaryHDU(image)
-            hdu.writeto('/home/jbohrer/Desktop/results/exposure_' + str(i + exposure_count) + '.fits')
-            cv2.imwrite('/home/jbohrer/Desktop/results/exposure_' + str(i + exposure_count) + '.jpeg', image)
+            hdu.writeto(os.path.join(OUTPUT_DIR, 'results/exposure_') + str(i + exposure_count) + '.fits')
+            cv2.imwrite(os.path.join(OUTPUT_DIR, 'results/exposure_') + str(i + exposure_count) + '.jpeg',
+                        image)
 
             if sol == 0:
                 cmd = ['solve-field', '--use-sextractor', '--guess-scale', '--cpulimit', '10',
-                       '/home/jbohrer/Desktop/results/exposure_' + str(i + exposure_count) + '.fits']
-                result = subprocess.check_output(cmd, cwd='/home/jbohrer/Desktop/results/')
+                       os.path.join(OUTPUT_DIR, 'results/exposure_') + str(i + exposure_count) + '.fits']
+                result = subprocess.check_output(cmd, cwd=os.path.join(OUTPUT_DIR, 'results/'))
 
                 if b'Total CPU time limit reached' in result or b'Did not solve (or no WCS file was written)' in result:
                     display.insert(tk.END, 'Exposure ' + str(i + exposure_count) +': Unable to solve \n')
