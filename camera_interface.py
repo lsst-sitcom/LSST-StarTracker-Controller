@@ -159,7 +159,9 @@ start = tk.Button(win, text='Start Exposure', command=execute_exposure).grid(row
 
 cv2.destroyAllWindows()
 os.chdir(OUTPUT_DIR)
-shutil.rmtree(os.path.join(os.curdir, RESULTS_DIR))
+results_path = os.path.join(os.curdir, RESULTS_DIR)
+if os.path.exists(results_path):
+    shutil.rmtree(os.path.join(os.curdir, RESULTS_DIR))
 os.makedirs(RESULTS_DIR)
 
 global exposure_count
