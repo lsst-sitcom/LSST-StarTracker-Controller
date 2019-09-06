@@ -172,6 +172,7 @@ with Vimba() as vimba:
     camera.open()
 
     # arm the camera and provide a function to be called upon frame ready
+    camera.PixelFormat = 'Mono14'
     camera.arm('Continuous', display_frame)
     camera.ExposureTimeAbs = 1e+3
     camera.ExposureAuto = 'Continuous'
