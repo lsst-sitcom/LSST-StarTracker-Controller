@@ -9,6 +9,7 @@ import sys
 
 from astropy.io import fits
 import cv2
+import numpy as np
 from pymba import Vimba, Frame
 
 try:
@@ -21,7 +22,7 @@ RESULTS_DIR = "results"
 def display_frame(frame: Frame, delay: Optional[int] = 1) -> None:
 
     # get a copy of the frame data
-    image = frame.buffer_data_numpy()
+    image = get_frame_array(frame)
 
     # display image
     cv2.namedWindow('Image', cv2.WINDOW_NORMAL)
@@ -53,7 +54,7 @@ def execute_exposure():
 
     for i in range(num):
         frame = camera.acquire_frame(int(2.5e+7))
-        image = frame.buffer_data_numpy()
+        image = get_frame_array(frame)
         hdu = fits.PrimaryHDU(image)
         hdu.writeto(os.path.join(OUTPUT_DIR, RESULTS_DIR, 'exposure_') + str(i + exposure_count) + '.fits')
         cv2.imwrite(os.path.join(OUTPUT_DIR, RESULTS_DIR, 'exposure_') + str(i + exposure_count) + '.jpeg',
@@ -111,6 +112,11 @@ def execute_exposure():
 
     win.mainloop()
 
+def get_frame_array(frame: Frame) -> np.ndarray:
+    return np.ndarray(buffer=frame.buffer_data(),
+                      dtype=np.uint16,
+                      shape=(frame.data.height, frame.data.width))
+
 # ================= Setting up GUI ================= #
 win = tk.Tk()
 win.title('StarTracker Controller')
@@ -153,7 +159,9 @@ start = tk.Button(win, text='Start Exposure', command=execute_exposure).grid(row
 
 cv2.destroyAllWindows()
 os.chdir(OUTPUT_DIR)
-shutil.rmtree(os.path.join(os.curdir, RESULTS_DIR))
+results_path = os.path.join(os.curdir, RESULTS_DIR)
+if os.path.exists(results_path):
+    shutil.rmtree(os.path.join(os.curdir, RESULTS_DIR))
 os.makedirs(RESULTS_DIR)
 
 global exposure_count
@@ -164,6 +172,7 @@ with Vimba() as vimba:
     camera.open()
 
     # arm the camera and provide a function to be called upon frame ready
+    camera.PixelFormat = 'Mono14'
     camera.arm('Continuous', display_frame)
     camera.ExposureTimeAbs = 1e+3
     camera.ExposureAuto = 'Continuous'
