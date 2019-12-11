@@ -68,6 +68,7 @@ def execute_exposure():
             if b'Total CPU time limit reached' in result or \
                b'Did not solve (or no WCS file was written)' in result:
                 display.insert(tk.END, 'Exposure ' + str(i + exposure_count) + ': Unable to solve \n')
+                display.update()
 
                 if res == 1:
                     f.write('Exposure ' + str(i + exposure_count) + ': Unable to solve \n')
@@ -80,6 +81,7 @@ def execute_exposure():
                 point = result[guide_front:guide_back - 6].decode()
 
                 display.insert(tk.END, 'Exposure ' + str(i + exposure_count) + ': ' + point + '\n')
+                display.update()
 
                 if res == 1:
                     f.write('Exposure ' + str(i + exposure_count) + ': ' + point + '\n')
