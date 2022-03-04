@@ -18,6 +18,15 @@ except IndexError:
     OUTPUT_DIR = os.path.expanduser("~/Desktop")
 
 RESULTS_DIR = "results"
+DEBUG = True
+
+if DEBUG:
+    PIXEL_FORMAT = "Mono8"
+    PIXEL_DTYPE = np.uint8
+else:
+    PIXEL_FORMAT = "Mono14"
+    PIXEL_DTYPE = np.uint16
+
 
 def display_frame(frame: Frame, delay: Optional[int] = 1) -> None:
 
@@ -116,7 +125,7 @@ def execute_exposure():
 
 def get_frame_array(frame: Frame) -> np.ndarray:
     return np.ndarray(buffer=frame.buffer_data(),
-                      dtype=np.uint16,
+                      dtype=PIXEL_DTYPE,
                       shape=(frame.data.height, frame.data.width))
 
 # ================= Setting up GUI ================= #
@@ -174,7 +183,7 @@ with Vimba() as vimba:
     camera.open()
 
     # arm the camera and provide a function to be called upon frame ready
-    camera.PixelFormat = 'Mono14'
+    camera.PixelFormat = PIXEL_FORMAT
     camera.arm('Continuous', display_frame)
     camera.ExposureTimeAbs = 1e+3
     camera.ExposureAuto = 'Continuous'
