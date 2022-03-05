@@ -19,6 +19,7 @@ except IndexError:
 
 RESULTS_DIR = "results"
 DEBUG = True
+ROI_SIZE = 30
 
 if DEBUG:
     PIXEL_FORMAT = "Mono8"
@@ -27,21 +28,51 @@ else:
     PIXEL_FORMAT = "Mono14"
     PIXEL_DTYPE = np.uint16
 
+global image
+
 
 def display_frame(frame: Frame, delay: Optional[int] = 1) -> None:
 
     # get a copy of the frame data
+    global image
     image = get_frame_array(frame)
 
     # display image
     cv2.namedWindow('Image', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('Image', 600, 600)
     cv2.imshow('Image', image)
+    cv2.setMouseCallback('Image', display_zoom)
     cv2.waitKey(delay)
 
+def display_zoom(event, x: int, y:int, flags: dict, param) -> None:
+    if event == cv2.EVENT_MOUSEMOVE:
+        global image
+        y_max, x_max = image.shape
+        y_lower = y - ROI_SIZE
+        y_upper = y + ROI_SIZE
+        x_lower = x - ROI_SIZE
+        x_upper = x + ROI_SIZE
+        if y_upper >= y_max:
+            y_upper = y_max
+            y_lower = y_upper - 2 * ROI_SIZE
+        if x_upper >= x_max:
+            x_upper = x_max
+            x_lower = x_upper - 2 * ROI_SIZE
+        if y_lower <= 0:
+            y_lower = 0
+            y_upper = y_lower + 2 * ROI_SIZE
+        if x_lower <= 0:
+            x_lower = 0
+            x_upper = x_lower + 2 * ROI_SIZE
+        #print(x, x_lower, x_upper, y, y_lower, y_upper)
+        img_zoom = image[y_lower:y_upper,x_lower:x_upper]
+
+        cv2.namedWindow('Zoom', cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('Zoom', 200, 200)
+        cv2.imshow('Zoom', img_zoom)
 
 def execute_exposure():
-
+    cv2.destroyWindow('Zoom')
     global exposure_count
 
     list_RA = []
@@ -193,6 +224,7 @@ with Vimba() as vimba:
 
     win.mainloop()
 
+    cv2.destroyAllWindows()
     camera.stop_frame_acquisition()
     camera.disarm()
     camera.close()
