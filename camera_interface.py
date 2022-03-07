@@ -1,3 +1,4 @@
+import argparse
 import os
 from time import sleep
 import tkinter as tk
@@ -12,16 +13,16 @@ import cv2
 import numpy as np
 from pymba import Vimba, Frame
 
-try:
-    OUTPUT_DIR = sys.argv[1]
-except IndexError:
-    OUTPUT_DIR = os.path.expanduser("~/Desktop")
+parser = argparse.ArgumentParser()
+parser.add_argument("-d", "--debug", action="store_true", help="Use debugging camera config")
+parser.add_argument("--output-dir", default=os.path.expanduser("~/Desktop"),
+                    help="Change the default output directory.")
+args = parser.parse_args()
 
 RESULTS_DIR = "results"
-DEBUG = True
 ROI_SIZE = 30
 
-if DEBUG:
+if args.debug:
     PIXEL_FORMAT = "Mono8"
     PIXEL_DTYPE = np.uint8
 else:
@@ -84,7 +85,7 @@ def execute_exposure():
     res = r.get()
 
     if res == 1:
-        f = open(os.path.join(OUTPUT_DIR, RESULTS_DIR, 'results.csv'), 'w')
+        f = open(os.path.join(args.output_dir, RESULTS_DIR, 'results.csv'), 'w')
 
     camera.stop_frame_acquisition()
     camera.disarm()
@@ -96,14 +97,14 @@ def execute_exposure():
         frame = camera.acquire_frame(int(2.5e+7))
         image = get_frame_array(frame)
         hdu = fits.PrimaryHDU(image)
-        hdu.writeto(os.path.join(OUTPUT_DIR, RESULTS_DIR, 'exposure_') + str(i + exposure_count) + '.fits')
-        cv2.imwrite(os.path.join(OUTPUT_DIR, RESULTS_DIR, 'exposure_') + str(i + exposure_count) + '.jpeg',
+        hdu.writeto(os.path.join(args.output_dir, RESULTS_DIR, 'exposure_') + str(i + exposure_count) + '.fits')
+        cv2.imwrite(os.path.join(args.output_dir, RESULTS_DIR, 'exposure_') + str(i + exposure_count) + '.jpeg',
                     image)
 
         if sol == 0:
             cmd = ['solve-field', '--use-sextractor', '--guess-scale', '--cpulimit', '10',
-                   os.path.join(OUTPUT_DIR, RESULTS_DIR, 'exposure_') + str(i + exposure_count) + '.fits']
-            result = subprocess.check_output(cmd, cwd=os.path.join(OUTPUT_DIR, RESULTS_DIR))
+                   os.path.join(args.output_dir, RESULTS_DIR, 'exposure_') + str(i + exposure_count) + '.fits']
+            result = subprocess.check_output(cmd, cwd=os.path.join(args.output_dir, RESULTS_DIR))
 
             if b'Total CPU time limit reached' in result or \
                b'Did not solve (or no WCS file was written)' in result:
@@ -200,7 +201,7 @@ start = tk.Button(win, text='Start Exposure', command=execute_exposure).grid(row
 # ================================================== #
 
 cv2.destroyAllWindows()
-os.chdir(OUTPUT_DIR)
+os.chdir(args.output_dir)
 results_path = os.path.join(os.curdir, RESULTS_DIR)
 if os.path.exists(results_path):
     shutil.rmtree(os.path.join(os.curdir, RESULTS_DIR))
