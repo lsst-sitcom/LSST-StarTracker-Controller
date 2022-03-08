@@ -30,6 +30,7 @@ else:
     PIXEL_DTYPE = np.uint16
 
 global image
+global scaled_image
 
 
 def display_frame(frame: Frame, delay: Optional[int] = 1) -> None:
@@ -43,10 +44,12 @@ def display_frame(frame: Frame, delay: Optional[int] = 1) -> None:
     cv2.resizeWindow('Image', 600, 600)
     cv2.imshow('Image', image)
     cv2.setMouseCallback('Image', display_zoom)
+    cv2.createTrackbar('Scaling', 'Image', 0, 100, image_scaling)
     cv2.waitKey(delay)
 
 def display_zoom(event, x: int, y:int, flags: dict, param) -> None:
     if event == cv2.EVENT_MOUSEMOVE:
+        global scaled_image
         global image
         y_max, x_max = image.shape
         y_lower = y - ROI_SIZE
@@ -66,11 +69,22 @@ def display_zoom(event, x: int, y:int, flags: dict, param) -> None:
             x_lower = 0
             x_upper = x_lower + 2 * ROI_SIZE
         #print(x, x_lower, x_upper, y, y_lower, y_upper)
-        img_zoom = image[y_lower:y_upper,x_lower:x_upper]
+        try:
+            img_zoom = scaled_image[y_lower:y_upper,x_lower:x_upper]
+        except NameError:
+            img_zoom = image[y_lower:y_upper,x_lower:x_upper]
 
         cv2.namedWindow('Zoom', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('Zoom', 200, 200)
         cv2.imshow('Zoom', img_zoom)
+
+def image_scaling(pos: int):
+    global scaled_image
+    global image
+
+    scaled_image = cv2.convertScaleAbs(image, alpha=1, beta=pos)
+    cv2.imshow('Image', scaled_image)
+    cv2.waitKey(1)
 
 def execute_exposure():
     cv2.destroyWindow('Zoom')
