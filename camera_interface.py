@@ -25,9 +25,11 @@ ROI_SIZE = 30
 if args.debug:
     PIXEL_FORMAT = "Mono8"
     PIXEL_DTYPE = np.uint8
+    PIXEL_SCALING = 75
 else:
     PIXEL_FORMAT = "Mono14"
     PIXEL_DTYPE = np.uint16
+    PIXEL_SCALING = 4000
 
 global image
 global scaled_image
@@ -44,7 +46,7 @@ def display_frame(frame: Frame, delay: Optional[int] = 1) -> None:
     cv2.resizeWindow('Image', 600, 600)
     cv2.imshow('Image', image)
     cv2.setMouseCallback('Image', display_zoom)
-    cv2.createTrackbar('Scaling', 'Image', 0, 100, image_scaling)
+    cv2.createTrackbar('Scaling', 'Image', 0, PIXEL_SCALING, image_scaling)
     cv2.waitKey(delay)
 
 def display_zoom(event, x: int, y:int, flags: dict, param) -> None:
