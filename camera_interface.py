@@ -2,6 +2,7 @@ import argparse
 import os
 from time import sleep
 import tkinter as tk
+from tkinter import filedialog
 from typing import Optional
 import shutil
 import statistics as st
@@ -21,6 +22,9 @@ args = parser.parse_args()
 
 RESULTS_DIR = "results"
 ROI_SIZE = 30
+global astrometry_results
+astrometry_results = None
+
 
 if args.debug:
     PIXEL_FORMAT = "Mono8"
@@ -101,7 +105,10 @@ def execute_exposure():
     res = r.get()
 
     if res == 1:
-        f = open(os.path.join(args.output_dir, RESULTS_DIR, 'results.csv'), 'w')
+        global astrometry_results
+        if astrometry_results is None:
+            astrometry_results = os.path.join(args.output_dir, RESULTS_DIR, 'results.csv')
+        f = open(astrometry_results, 'w')
 
     camera.stop_frame_acquisition()
     camera.disarm()
@@ -176,10 +183,22 @@ def get_frame_array(frame: Frame) -> np.ndarray:
                       dtype=PIXEL_DTYPE,
                       shape=(frame.data.height, frame.data.width))
 
+def open_saveas_dialog(*args):
+    global astrometry_results
+    astrometry_results = tk.filedialog.asksaveasfilename(defaultextension=".csv",
+                                                         filetypes=[("CSV", "*.csv")])
+
 # ================= Setting up GUI ================= #
 win = tk.Tk()
+win.option_add("*tearOff", False)
 win.title('StarTracker Controller')
 # win.geometry('600x400')
+
+menubar = tk.Menu(win)
+win["menu"] = menubar
+menu_file = tk.Menu(win)
+menubar.add_cascade(menu=menu_file, label="File")
+menu_file.add_command(label="Save Astrometry Results", command=open_saveas_dialog)
 
 welcome = tk.Label(win, text='Welcome to the LSST StarTracker Controller!').grid(row=0, column=0, sticky='w')
 
