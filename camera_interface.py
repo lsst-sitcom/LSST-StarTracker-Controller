@@ -88,7 +88,7 @@ def image_scaling(pos: int):
     global scaled_image
     global image
 
-    scaled_image = cv2.convertScaleAbs(image, alpha=1, beta=pos)
+    scaled_image = image + pos
     cv2.imshow('Image', scaled_image)
     cv2.waitKey(1)
 
