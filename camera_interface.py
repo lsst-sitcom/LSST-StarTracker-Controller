@@ -25,15 +25,21 @@ ROI_SIZE = 30
 global astrometry_results
 astrometry_results = None
 
+def get_bit_max(pix_format: str) -> int:
+  power = int(pix_format.split("Mono")[-1])
+  return 2**power
+
 
 if args.debug:
     PIXEL_FORMAT = "Mono8"
     PIXEL_DTYPE = np.uint8
     PIXEL_SCALING = 75
+    PIXEL_MAX = get_bit_max(PIXEL_FORMAT)
 else:
     PIXEL_FORMAT = "Mono14"
     PIXEL_DTYPE = np.uint16
     PIXEL_SCALING = 4000
+    PIXEL_MAX = get_bit_max(PIXEL_FORMAT)
 
 global image
 global scaled_image
@@ -50,7 +56,8 @@ def display_frame(frame: Frame, delay: Optional[int] = 1) -> None:
     cv2.resizeWindow('Image', 600, 600)
     cv2.imshow('Image', image)
     cv2.setMouseCallback('Image', display_zoom)
-    cv2.createTrackbar('Scaling', 'Image', 0, PIXEL_SCALING, image_scaling)
+    cv2.createTrackbar('Scaling', 'Image', 0, 40, image_scaling)
+    image_scaling(1)
     cv2.waitKey(delay)
 
 def display_zoom(event, x: int, y:int, flags: dict, param) -> None:
@@ -83,12 +90,15 @@ def display_zoom(event, x: int, y:int, flags: dict, param) -> None:
         cv2.namedWindow('Zoom', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('Zoom', 200, 200)
         cv2.imshow('Zoom', img_zoom)
+        cv2.waitKey(0)
 
 def image_scaling(pos: int):
     global scaled_image
     global image
 
-    scaled_image = image + pos
+    gamma = 1.0 + 0.1 * pos
+
+    scaled_image = (((image / PIXEL_MAX)**gamma) * PIXEL_MAX).astype(PIXEL_DTYPE)
     cv2.imshow('Image', scaled_image)
     cv2.waitKey(1)
 
