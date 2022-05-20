@@ -8,7 +8,7 @@ services:
     environment:
       - LSST_DDS_PARTITION_PREFIX=camera-test
       - LSST_SITE=tucson
-      - LSST_DDS_INTERFACE=enx54b203969ed0
+      - LSST_DDS_INTERFACE=wlp2s0
     volumes:
       - $HOME/.auth:/home/saluser/.auth
       - $HOME/.gitconfig:/home/saluser/.gitconfig

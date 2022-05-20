@@ -16,12 +16,12 @@ class Commander:
 
     async def run_command(self):
         async with salobj.Domain() as domain:
-            arc = salobj.Remote(domain=domain, name="GenericCamera", index=4)
+            arc = salobj.Remote(domain=domain, name=self.device_name, index=4)
             await arc.start_task
 
             try:
                 if self.command == "start":
-                    await arc.cmd_start.set_start(override=self.overrides, timeout=self.timeout)
+                    await arc.cmd_start.set_start(configurationOverride=self.overrides, timeout=self.timeout)
                 else:
                     cmd = getattr(arc, f"cmd_{self.command}")
                     await cmd.set_start(timeout=self.timeout)
@@ -50,5 +50,5 @@ if __name__ == "__main__":
     if args.command == "start":
         overrides = args.overrides
 
-    cmdr = Commander(args.device, args.command, args.timeout, overrides)
+    cmdr = Commander("GenericCamera", args.command, args.timeout, overrides)
     asyncio.run(cmdr.run_command())
