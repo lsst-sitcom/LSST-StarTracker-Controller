@@ -13,6 +13,7 @@ services:
       - $HOME/.auth:/home/saluser/.auth
       - $HOME/.gitconfig:/home/saluser/.gitconfig
       - $HOME/Docker-Sandbox/lsst-ts:/home/saluser/develop
+      - ${OSPL_STD}:${OSPL_LOC}
     tty: true
     stdin_open: true
     ipc: host
