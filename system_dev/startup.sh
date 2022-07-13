@@ -1,7 +1,7 @@
 #!/bin/bash
 index=${1:-4}
 if [ $1 -eq 4 ]; then
-  config="--override=alliedvision.yaml"
+  config="--override=dsmdev.yaml"
 else
   config=""
 fi
