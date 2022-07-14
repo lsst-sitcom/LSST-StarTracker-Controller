@@ -1,6 +1,6 @@
 #!/bin/bash
-index=${1:-4}
-if [ $1 -eq 4 ]; then
+index=${1:-301}
+if [ $1 -eq 301 ]; then
   config="--override=dsmdev.yaml"
 else
   config=""
