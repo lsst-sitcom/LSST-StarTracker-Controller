@@ -1,0 +1,27 @@
+version: "3.6"
+
+services:
+
+  camera-dev:
+    image: lsstts/develop-env:develop
+    container_name: camera-dev
+    environment:
+      - LSST_DDS_PARTITION_PREFIX=camera-test
+      - LSST_SITE=tucson
+      - LSST_DDS_INTERFACE=wlp2s0
+    volumes:
+      - $HOME/.auth:/home/saluser/.auth
+      - $HOME/.gitconfig:/home/saluser/.gitconfig
+      - $HOME/Docker-Sandbox/lsst-ts:/home/saluser/develop
+      - ${OSPL_STD}:${OSPL_LOC}
+    tty: true
+    stdin_open: true
+    ipc: host
+    pid: host
+    network_mode: host
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "100m"
+
