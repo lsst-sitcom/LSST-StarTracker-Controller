@@ -62,6 +62,7 @@ services:
       - LSST_SITE=tucson
       - LSST_DDS_DOMAIN_ID=${LSST_DDS_DOMAIN_ID}
       - LSST_DDS_DOMAIN_NAME=${LSST_DDS_DOMAIN_NAME}
+      - LSST_DDS_INTERFACE=eth1
     volumes:
       - $HOME/.auth:/home/saluser/.auth
       - $HOME/.gitconfig:/home/saluser/.gitconfig
@@ -74,6 +75,7 @@ services:
     pid: host
     networks:
       - love
+      - camera
     logging:
       driver: "json-file"
       options:
@@ -82,4 +84,6 @@ services:
 
 networks:
   love:
+    external: true
+  camera:
     external: true
