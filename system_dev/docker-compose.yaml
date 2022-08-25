@@ -36,32 +36,6 @@ services:
       - LSST_SITE=tucson
       - LSST_DDS_DOMAIN_ID=${LSST_DDS_DOMAIN_ID}
       - LSST_DDS_DOMAIN_NAME=${LSST_DDS_DOMAIN_NAME}
-    volumes:
-      - $HOME/.auth:/home/saluser/.auth
-      - $HOME/.gitconfig:/home/saluser/.gitconfig
-      - $HOME/Docker-Sandbox/lsst-ts:/home/saluser/develop
-      - ${OSPL_SHMEM_SOCKET_DIR}:/tmp/
-      - ${OSPL_SHMEM_CONFIG}:${OSPL_MOUNT_POINT}
-    tty: true
-    stdin_open: true
-    ipc: host
-    pid: host
-    networks:
-      - love
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "5"
-        max-size: "100m"
-
-  dev-tester:
-    image: ts-dockerhub.lsst.org/develop-env:${CYCLE}${REV}
-    container_name: dev-tester
-    environment:
-      - LSST_DDS_PARTITION_PREFIX=${SITE_PARTITION_PREFIX}
-      - LSST_SITE=tucson
-      - LSST_DDS_DOMAIN_ID=${LSST_DDS_DOMAIN_ID}
-      - LSST_DDS_DOMAIN_NAME=${LSST_DDS_DOMAIN_NAME}
       - LSST_DDS_INTERFACE=eth1
     volumes:
       - $HOME/.auth:/home/saluser/.auth
@@ -76,6 +50,33 @@ services:
     networks:
       - love
       - camera
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "100m"
+
+  dev-tester:
+    image: ts-dockerhub.lsst.org/develop-env:${CYCLE}${REV}
+    container_name: dev-tester
+    environment:
+      - LSST_DDS_PARTITION_PREFIX=${SITE_PARTITION_PREFIX}
+      - LSST_SITE=tucson
+      - LSST_DDS_DOMAIN_ID=${LSST_DDS_DOMAIN_ID}
+      - LSST_DDS_DOMAIN_NAME=${LSST_DDS_DOMAIN_NAME}
+
+    volumes:
+      - $HOME/.auth:/home/saluser/.auth
+      - $HOME/.gitconfig:/home/saluser/.gitconfig
+      - $HOME/Docker-Sandbox/lsst-ts:/home/saluser/develop
+      - ${OSPL_SHMEM_SOCKET_DIR}:/tmp/
+      - ${OSPL_SHMEM_CONFIG}:${OSPL_MOUNT_POINT}
+    tty: true
+    stdin_open: true
+    ipc: host
+    pid: host
+    networks:
+      - love
     logging:
       driver: "json-file"
       options:
