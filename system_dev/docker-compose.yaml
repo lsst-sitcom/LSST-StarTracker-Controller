@@ -1,27 +1,90 @@
 version: "3.6"
 
 services:
+  ospl-dev:
+    image: ts-dockerhub.lsst.org/ospl-daemon:${CYCLE}
+    container_name: ospl-daemon
+    environment:
+      - LSST_DDS_PARTITION_PREFIX=${SITE_PARTITION_PREFIX}
+      - LSST_DDS_RESPONSIVENESS_TIMEOUT=15s
+      - LSST_DDS_ALIGNEE=Initial
+      - LSST_DDS_ALIGNER=true
+      - LSST_DDS_DOMAIN_ID=${LSST_DDS_DOMAIN_ID}
+      - LSST_DDS_DOMAIN_NAME=${LSST_DDS_DOMAIN_NAME}
+      - OSPL_MASTER_PRIORITY=101
+      - OSPL_INFOFILE=/tmp/ospl-info-daemon.log
+      - OSPL_ERRORFILE=/tmp/ospl-error-daemon.log
+    volumes:
+      - ${OSPL_SHMEM_SOCKET_DIR}:/tmp/
+      - ${OSPL_SHMEM_CONFIG}:${OSPL_MOUNT_POINT}
+    tty: true
+    ipc: host
+    pid: host
+    networks:
+      - love
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
 
   camera-dev:
-    image: lsstts/develop-env:develop
+    image: ts-dockerhub.lsst.org/develop-env:${CYCLE}${REV}
     container_name: camera-dev
     environment:
-      - LSST_DDS_PARTITION_PREFIX=camera-test
+      - LSST_DDS_PARTITION_PREFIX=${SITE_PARTITION_PREFIX}
       - LSST_SITE=tucson
-      - LSST_DDS_INTERFACE=wlp2s0
+      - LSST_DDS_DOMAIN_ID=${LSST_DDS_DOMAIN_ID}
+      - LSST_DDS_DOMAIN_NAME=${LSST_DDS_DOMAIN_NAME}
+      - LSST_DDS_INTERFACE=eth1
     volumes:
       - $HOME/.auth:/home/saluser/.auth
       - $HOME/.gitconfig:/home/saluser/.gitconfig
       - $HOME/Docker-Sandbox/lsst-ts:/home/saluser/develop
-      - ${OSPL_STD}:${OSPL_LOC}
+      - ${OSPL_SHMEM_SOCKET_DIR}:/tmp/
+      - ${OSPL_SHMEM_CONFIG}:${OSPL_MOUNT_POINT}
     tty: true
     stdin_open: true
     ipc: host
     pid: host
-    network_mode: host
+    networks:
+      - love
+      - camera
     logging:
       driver: "json-file"
       options:
         max-file: "5"
         max-size: "100m"
 
+  dev-tester:
+    image: ts-dockerhub.lsst.org/develop-env:${CYCLE}${REV}
+    container_name: dev-tester
+    environment:
+      - LSST_DDS_PARTITION_PREFIX=${SITE_PARTITION_PREFIX}
+      - LSST_SITE=tucson
+      - LSST_DDS_DOMAIN_ID=${LSST_DDS_DOMAIN_ID}
+      - LSST_DDS_DOMAIN_NAME=${LSST_DDS_DOMAIN_NAME}
+
+    volumes:
+      - $HOME/.auth:/home/saluser/.auth
+      - $HOME/.gitconfig:/home/saluser/.gitconfig
+      - $HOME/Docker-Sandbox/lsst-ts:/home/saluser/develop
+      - ${OSPL_SHMEM_SOCKET_DIR}:/tmp/
+      - ${OSPL_SHMEM_CONFIG}:${OSPL_MOUNT_POINT}
+    tty: true
+    stdin_open: true
+    ipc: host
+    pid: host
+    networks:
+      - love
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "100m"
+
+networks:
+  love:
+    external: true
+  camera:
+    external: true
