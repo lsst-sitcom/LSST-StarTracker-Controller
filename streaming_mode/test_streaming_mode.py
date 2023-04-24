@@ -16,7 +16,8 @@ import vimba
 
 
 class Driver:
-    def __init__(self, exposure_time: int, is_jpeg: bool, roi: str | None):
+    def __init__(self, device_id: str, exposure_time: int, is_jpeg: bool, roi: str | None):
+        self.device_id = device_id
         self.num_images: int = 0
         self.start_time: float = 0
         self.end_time: float = 0
@@ -88,7 +89,6 @@ class Driver:
                 cam.Width.set(self.width)
                 cam.Height.set(self.height)
 
-
     def frame_handler(self, cam: vimba.Camera, frame: vimba.Frame):
         print('{} acquired {}'.format(cam, frame), flush=True)
         self.num_images += 1
@@ -121,9 +121,8 @@ class Driver:
         img.save(file_path, "PNG")
 
     def run(self):
-        cam_id = ""
         with vimba.Vimba.get_instance():
-            with self.get_camera(cam_id) as cam:
+            with self.get_camera(self.device_id) as cam:
 
                 self.setup_camera(cam)
                 print('Press <enter> to stop Frame acquisition.')
@@ -146,7 +145,7 @@ class Driver:
                 print(f"FPS = {fps}")
 
 async def main(opts: argparse.Namespace) -> None:
-    d = Driver(opts.exposure_time, opts.save_jpeg, opts.roi)
+    d = Driver(opts.device_id, opts.exposure_time, opts.save_jpeg, opts.roi)
     d.run()
 
 if __name__ == '__main__':
@@ -154,5 +153,6 @@ if __name__ == '__main__':
     parser.add_argument("-e", "--exposure_time", type=int, default=10000)
     parser.add_argument("-j", "--save-jpeg", action="store_true")
     parser.add_argument("-r", "--roi")
+    parser.add_argument("-i", "--device-id")
     args = parser.parse_args()
     asyncio.run(main(args))
