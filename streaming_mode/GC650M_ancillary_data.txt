@@ -1,0 +1,47 @@
+//////////////////////////////////////////////////////
+/// Vimba API List Ancillary Data Features Example ///
+//////////////////////////////////////////////////////
+
+Print ancillary data contained in Frame:
+Feature Name   : ChunkAcquisitionFrameCount
+Display Name   : Chunk Acquisition Frame Count
+Tooltip        : This is the number of the frame during the current acquisition.
+Description    : This is the number of the frame during the current acquisition.
+SFNC Namespace : Custom
+Value          : 1
+
+Feature Name   : ChunkExposureTime
+Display Name   : Chunk Exposure Time
+Tooltip        : Exposure duration, in microseconds.
+Description    : Exposure duration, in microseconds.
+SFNC Namespace : Custom
+Value          : 2000.0
+
+Feature Name   : ChunkGain
+Display Name   : Chunk Gain
+Tooltip        : Gain value of analog A/D stage. Units are usually in dB.
+Description    : Gain value of analog A/D stage. Units are usually in dB.
+SFNC Namespace : Custom
+Value          : 0.0
+
+Feature Name   : ChunkSyncInLevels
+Display Name   : Chunk Sync In Levels
+Tooltip        : Momentary logic levels of the hardware line inputs.
+Description    : Momentary logic levels of the hardware line inputs.
+SFNC Namespace : Custom
+Value          : 0
+
+Feature Name   : ChunkSyncOutLevels
+Display Name   : Chunk Sync Out Levels
+Tooltip        : Output levels of hardware sync outputs, for output(s) in GPO mode.
+Description    : Output levels of hardware sync outputs, for output(s) in GPO mode.
+SFNC Namespace : Custom
+Value          : 0
+
+Feature Name   : ChunkUserValue
+Display Name   : Chunk User Value
+Tooltip        : User value
+Description    : User value
+SFNC Namespace : Custom
+Value          : 0
+

@@ -16,8 +16,9 @@ import vimba
 
 
 class Driver:
-    def __init__(self, device_id: str, exposure_time: int, is_jpeg: bool, roi: str | None):
+    def __init__(self, device_id: str, exposure_time: int, is_jpeg: bool, roi: str | None, no_save: bool = False):
         self.device_id = device_id
+        self.no_save = no_save
         self.num_images: int = 0
         self.start_time: float = 0
         self.end_time: float = 0
@@ -92,7 +93,8 @@ class Driver:
     def frame_handler(self, cam: vimba.Camera, frame: vimba.Frame):
         print('{} acquired {}'.format(cam, frame), flush=True)
         self.num_images += 1
-        self.save_file(frame.as_numpy_ndarray(), self.num_images)
+        if not self.no_save:
+            self.save_file(frame.as_numpy_ndarray(), frame.get_id())
         cam.queue_frame(frame)
 
     def create_fits_file(self, buffer: np.ndarray, frame_num: int) -> None:
@@ -145,7 +147,7 @@ class Driver:
                 print(f"FPS = {fps}")
 
 async def main(opts: argparse.Namespace) -> None:
-    d = Driver(opts.device_id, opts.exposure_time, opts.save_jpeg, opts.roi)
+    d = Driver(opts.device_id, opts.exposure_time, opts.save_jpeg, opts.roi, opts.no_save)
     d.run()
 
 if __name__ == '__main__':
@@ -154,5 +156,6 @@ if __name__ == '__main__':
     parser.add_argument("-j", "--save-jpeg", action="store_true")
     parser.add_argument("-r", "--roi")
     parser.add_argument("-i", "--device-id")
+    parser.add_argument("--no-save", action="store_true")
     args = parser.parse_args()
     asyncio.run(main(args))

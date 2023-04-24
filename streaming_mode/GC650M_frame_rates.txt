@@ -1,0 +1,16 @@
+Roi size: 659x493
+Frame rate limit:89.58967926894822
+Frame rate abs: 89.58967926894822
+Roi size: 200x200
+Frame rate limit:187.9699248120301
+Frame rate abs: 187.9699248120301
+Roi size: 150x150
+Frame rate limit:231.3208420078649
+Frame rate abs: 231.3208420078649
+Roi size: 100x100
+Frame rate limit:300.6614552014432
+Frame rate abs: 300.6614552014432
+Roi size: 50x50
+Frame rate limit:429.36882782310005
+Frame rate abs: 429.36882782310005
+
