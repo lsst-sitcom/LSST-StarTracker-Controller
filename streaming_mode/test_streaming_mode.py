@@ -77,6 +77,7 @@ class Driver:
                 cam.set_pixel_format(vimba.PixelFormat.Mono12)
 
             except (AttributeError, vimba.VimbaFeatureError):
+                print("Packet size adjustment failed")
                 pass
 
             try:

@@ -35,7 +35,7 @@ def get_camera(camera_id: Optional[str]) -> vimba.Camera:
 
 
 def main(opts: argparse.Namespace) -> None:
-    cam_id = ""
+    cam_id = opts.device_id
 
     if opts.roi is not None:
         rois = [[int(x) for x in opts.roi.split(',')]]
@@ -44,6 +44,16 @@ def main(opts: argparse.Namespace) -> None:
 
     with vimba.Vimba.get_instance():
         with get_camera(cam_id) as cam:
+            try:
+                cam.GVSPAdjustPacketSize.run()
+
+                while not cam.GVSPAdjustPacketSize.is_done():
+                    pass
+
+            except (AttributeError, vimba.VimbaFeatureError):
+                print("Packet size adjustment failed")
+                pass
+
             if opts.roi is None:
                 rois[0][2] = cam.WidthMax.get()
                 rois[0][3] = cam.HeightMax.get()
@@ -63,5 +73,6 @@ def main(opts: argparse.Namespace) -> None:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--roi")
+    parser.add_argument("-i", "--device-id", default="")
     args = parser.parse_args()
     main(args)

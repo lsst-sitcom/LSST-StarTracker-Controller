@@ -14,6 +14,7 @@ class Commander:
         self.timeout = self.opts.timeout
         self.overrides = self.opts.overrides
         self.exp_time = self.opts.exp_time
+        self.roi = self.opts.roi
 
     async def run_command(self):
         async with salobj.Domain() as domain, salobj.Remote(
@@ -21,30 +22,43 @@ class Commander:
         ) as csc:
             await csc.start_task
 
+            cmd = getattr(csc, f"cmd_{self.command}")
+            params = {"timeout": self.timeout}
+
+            if self.command == "start":
+                params.update({"configurationOverride": self.overrides})
+            elif self.command == "startLiveView":
+                params.update({"expTime": self.exp_time})
+            elif self.command == "takeImages":
+                params.update(
+                    {
+                        "expTime": self.exp_time,
+                        "numImages": self.opts.num_images,
+                        "shutter": True,
+                        "sensors": "",
+                        "keyValueMap": "imageType:TEST",
+                        "obsNote": "",
+                    }
+                )
+            elif self.command == "setROI":
+                top, left, width, height = [int(x) for x in self.roi.split(",")][:]
+                params.update(
+                    {
+                        "topPixel": top,
+                        "leftPixel": left,
+                        "width": width,
+                        "height": height,
+                    }
+                )
+            elif self.command == "startStreamingMode":
+                params.update({"expTime": self.exp_time})
+
             try:
-                if self.command == "start":
-                    await csc.cmd_start.set_start(
-                        configurationOverride=self.overrides, timeout=self.timeout
-                    )
-                elif self.command == "startLiveView":
-                    await csc.cmd_startLiveView.set_start(
-                        expTime=self.exp_time, timeout=self.timeout
-                    )
-                elif self.command == "takeImages":
-                    await csc.cmd_takeImages.set_start(
-                        expTime=self.exp_time,
-                        numImages=self.opts.num_images,
-                        shutter=True,
-                        sensors="",
-                        keyValueMap="imageType:TEST",
-                        obsNote="",
-                        timeout=self.timeout,
-                    )
-                else:
-                    cmd = getattr(csc, f"cmd_{self.command}")
-                    await cmd.set_start(timeout=self.timeout)
+                await cmd.set_start(**params)
             except Exception as e:
                 print(e)
+
+            print("Done")
 
 
 if __name__ == "__main__":
@@ -81,6 +95,20 @@ if __name__ == "__main__":
         "-n", "--num-images", type=int, default=1, help="Number of exposures to take"
     )
 
+    start_streaming_mode_parser = subparsers.add_parser("startStreamingMode")
+    start_streaming_mode_parser.add_argument(
+        "-e",
+        "--exp-time",
+        type=float,
+        default=0.011,
+        help="Set the streaming mode exposure time",
+    )
+
+    roi_parser = subparsers.add_parser("setROI")
+    roi_parser.add_argument(
+        "-r", "--roi", help="ROI as comma-delimited string: top,left,width,height"
+    )
+
     cmds = [
         "enable",
         "disable",
@@ -90,7 +118,10 @@ if __name__ == "__main__":
         "abort",
         "resetFromFault",
         "stopLiveView",
+        "setFullFrame",
+        "stopStreamingMode",
     ]
+
     for x in cmds:
         p = subparsers.add_parser(x)
 
@@ -98,10 +129,12 @@ if __name__ == "__main__":
 
     if args.command != "start":
         args.overrides = None
-    if args.command != "startLiveView" and args.command != "takeImages":
+    if args.command not in ["startLiveView", "takeImages", "startStreamingMode"]:
         args.exp_time = 0.0
     if args.command != "takeImages":
         args.num_images = 1
+    if args.command != "setROI":
+        args.roi = None
 
     cmdr = Commander("GenericCamera", args)
     asyncio.run(cmdr.run_command())

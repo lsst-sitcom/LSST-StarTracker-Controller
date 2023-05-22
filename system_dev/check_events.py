@@ -30,6 +30,7 @@ async def main(opts):
                 "largeFileObjectAvailable"
             )
         remote.evt_endTakeImage.callback = print_event("endTakeImage")
+        remote.evt_roi.callback = print_event("roi")
 
         while True:
             await asyncio.sleep(0.1)
