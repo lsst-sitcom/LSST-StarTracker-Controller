@@ -5,6 +5,6 @@ if [ $1 -eq 301 ]; then
 else
   config=""
 fi
-python develop/csc_command.py --index=${index} start ${config}
-python develop/csc_command.py --index=${index} enable
+python csc_command.py --index=${index} start ${config}
+python csc_command.py --index=${index} enable
 
