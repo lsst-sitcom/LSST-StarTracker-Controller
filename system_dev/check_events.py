@@ -31,6 +31,8 @@ async def main(opts):
             )
         remote.evt_endTakeImage.callback = print_event("endTakeImage")
         remote.evt_roi.callback = print_event("roi")
+        remote.evt_streamingModeStarted.callback = print_event("streamingModeStarted")
+        remote.evt_streamingModeStopped.callback = print_event("streamingModeStopped")
 
         while True:
             await asyncio.sleep(0.1)
