@@ -9,6 +9,10 @@ import numpy as np
 plt.style.use(astropy_mpl_style)
 matplotlib.use('QtAgg')
 
+def plot_data(data) -> None:
+    plt.imshow(data, cmap='gray')
+    # plt.colorbar()
+
 
 def print_min_max(data: np.ndarray) -> None:
     print(f"Max: {np.max(data)}")
@@ -16,11 +20,23 @@ def print_min_max(data: np.ndarray) -> None:
 
 
 def main(opts: argparse.Namespace) -> None:
+    data_blocks = []
     input_file = pathlib.Path(opts.data_file).expanduser()
     image_data = fits.getdata(input_file, ext=1)
-    print(image_data.shape)
-    print(f"{input_file.name}")
-    print_min_max(image_data)
+    data_blocks.append(image_data)
+    #  print(image_data.shape)
+    # print(f"{input_file.name}")
+    # print_min_max(image_data)
+
+    for i in range(5):
+        data_file = input_file.stem
+        parts = str(data_file).split("_")
+        seq_num = int(parts[-1])
+        new_seq_num = seq_num + 1 + i
+        parts[-1] = f"{new_seq_num:07d}"
+        new_input_file = input_file.parent / f"{'_'.join(parts)}{input_file.suffix}"
+        new_image_data = fits.getdata(new_input_file, ext=1)
+        data_blocks.append(new_image_data)
 
     if opts.diff:
         image_data = image_data.astype(np.int16)
@@ -39,7 +55,9 @@ def main(opts: argparse.Namespace) -> None:
         print_min_max(image_data)
 
     plt.figure()
-    plt.imshow(image_data, cmap='gray')
+    for data_block in data_blocks:
+        plot_data(data_block)
+    #  plt.imshow(image_data, cmap='gray')
     plt.colorbar()
     plt.show()
 

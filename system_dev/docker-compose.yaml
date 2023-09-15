@@ -40,7 +40,7 @@ services:
     volumes:
       - $HOME/.auth:/home/saluser/.auth
       - $HOME/.gitconfig:/home/saluser/.gitconfig
-      - $HOME/Docker-Sandbox/lsst-ts:/home/saluser/develop
+      - $HOME/git:/home/saluser/develop
       - ${OSPL_SHMEM_SOCKET_DIR}:/tmp/
       - ${OSPL_SHMEM_CONFIG}:${OSPL_MOUNT_POINT}
     tty: true
@@ -68,7 +68,7 @@ services:
     volumes:
       - $HOME/.auth:/home/saluser/.auth
       - $HOME/.gitconfig:/home/saluser/.gitconfig
-      - $HOME/Docker-Sandbox/lsst-ts:/home/saluser/develop
+      - $HOME/git:/home/saluser/develop
       - ${OSPL_SHMEM_SOCKET_DIR}:/tmp/
       - ${OSPL_SHMEM_CONFIG}:${OSPL_MOUNT_POINT}
     tty: true
